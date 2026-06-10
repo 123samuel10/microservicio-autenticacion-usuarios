@@ -6,7 +6,10 @@ from app.database import get_db
 from app.models.usuario import Usuario, TipoUsuario
 from app.services.auth_service import get_usuario_actual
 
-bearer_scheme = HTTPBearer()
+bearer_scheme = HTTPBearer(
+    scheme_name="BearerAuth",
+    description="Token JWT obtenido en /api/v1/auth/login",
+)
 
 
 async def get_current_user(
