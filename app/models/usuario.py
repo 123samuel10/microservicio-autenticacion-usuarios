@@ -5,7 +5,7 @@ import enum
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import String, Boolean, DateTime, Enum, Text, Integer, ForeignKey
+from sqlalchemy import String, Boolean, DateTime, Enum, Text, Integer, ForeignKey, ARRAY
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -66,6 +66,10 @@ class PerfilEstudiante(Base):
     universidad: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     programa: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     semestre: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # Disponibilidad laboral: "tiempo_completo" | "medio_tiempo" | "fines_de_semana".
+    disponibilidad: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    # Habilidades/skills del estudiante. Lista de strings; por defecto vacía ('{}').
+    habilidades: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=False, server_default="{}")
     url_cv: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     url_documento_identidad: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     url_certificados_academicos: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

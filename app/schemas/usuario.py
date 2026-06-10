@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.models.usuario import TipoUsuario
 
@@ -76,6 +76,12 @@ class PerfilEstudianteBase(BaseModel):
     universidad: Optional[str] = None
     programa: Optional[str] = None
     semestre: Optional[int] = Field(None, ge=1, le=12)
+    disponibilidad: Optional[str] = Field(
+        None, description="tiempo_completo | medio_tiempo | fines_de_semana"
+    )
+    # Optional[...] = None para que un update parcial no borre las habilidades
+    # existentes; en las respuestas se lee la lista real del ORM (server_default '{}').
+    habilidades: Optional[List[str]] = None
 
 
 class PerfilEstudianteUpdate(PerfilEstudianteBase):
@@ -145,6 +151,23 @@ class UsuarioResumenResponse(BaseModel):
     activo: bool
 
     model_config = {"from_attributes": True}
+
+
+class PerfilPublicoResponse(BaseModel):
+    """Datos públicos de un usuario, consultables por su id sin autenticación.
+
+    Pensado para que otros servicios/el frontend resuelvan el nombre visible
+    de una empresa o estudiante a partir de su `usuario_id` (p. ej. mostrar el
+    nombre de la empresa dueña de una vacante). NO expone email ni datos de
+    contacto sensibles.
+    """
+    id: uuid.UUID
+    tipo_usuario: TipoUsuario
+    nombre: str
+    sector: Optional[str] = None
+    ciudad: Optional[str] = None
+    programa: Optional[str] = None
+    universidad: Optional[str] = None
 
 
 # --- Documentos ---

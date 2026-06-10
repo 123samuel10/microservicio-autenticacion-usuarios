@@ -16,6 +16,7 @@ from app.repositories.usuario_repository import (
 from app.schemas.usuario import (
     PerfilEmpresaUpdate,
     PerfilEstudianteUpdate,
+    PerfilPublicoResponse,
     RegistroEmpresaRequest,
     RegistroEstudianteRequest,
     UsuarioResponse,
@@ -111,6 +112,36 @@ class UsuarioService:
 
     async def get_perfil(self, usuario_id: uuid.UUID) -> UsuarioResponse:
         return await self._get_usuario_completo(usuario_id)
+
+    async def get_perfil_publico(self, usuario_id: uuid.UUID) -> PerfilPublicoResponse:
+        usuario = await self.usuario_repo.get_by_id(usuario_id)
+        if not usuario:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+
+        if usuario.tipo_usuario == TipoUsuario.empresa and usuario.perfil_empresa:
+            p = usuario.perfil_empresa
+            return PerfilPublicoResponse(
+                id=usuario.id,
+                tipo_usuario=usuario.tipo_usuario,
+                nombre=p.nombre_empresa,
+                sector=p.sector,
+                ciudad=p.ciudad,
+            )
+        if usuario.tipo_usuario == TipoUsuario.estudiante and usuario.perfil_estudiante:
+            p = usuario.perfil_estudiante
+            return PerfilPublicoResponse(
+                id=usuario.id,
+                tipo_usuario=usuario.tipo_usuario,
+                nombre=f"{p.nombres} {p.apellidos}".strip(),
+                programa=p.programa,
+                universidad=p.universidad,
+            )
+        # Fallback: usuario sin perfil completo (p. ej. admin) → usamos el email.
+        return PerfilPublicoResponse(
+            id=usuario.id,
+            tipo_usuario=usuario.tipo_usuario,
+            nombre=usuario.email,
+        )
 
     async def actualizar_perfil_estudiante(
         self, usuario_id: uuid.UUID, datos: PerfilEstudianteUpdate

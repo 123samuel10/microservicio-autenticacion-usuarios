@@ -7,14 +7,26 @@ from app.schemas.usuario import (
     DocumentoUploadResponse,
     PerfilEmpresaUpdate,
     PerfilEstudianteUpdate,
+    PerfilPublicoResponse,
     RegistroEmpresaRequest,
     RegistroEstudianteRequest,
     UsuarioResponse,
 )
 from app.services.usuario_service import UsuarioService
 from app.controllers.deps import get_current_user, require_empresa, require_estudiante
+import uuid
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
+
+
+@router.get(
+    "/publico/{usuario_id}",
+    response_model=PerfilPublicoResponse,
+    summary="Datos públicos de un usuario (sin autenticación)",
+)
+async def get_perfil_publico(usuario_id: str, db: AsyncSession = Depends(get_db)):
+    service = UsuarioService(db)
+    return await service.get_perfil_publico(uuid.UUID(usuario_id))
 
 
 @router.post(
