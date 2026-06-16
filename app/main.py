@@ -56,6 +56,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
+    root_path="/autenticacion",  # Prefijo del ALB
 )
 
 app.add_middleware(
